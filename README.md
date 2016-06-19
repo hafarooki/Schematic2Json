@@ -6,4 +6,4 @@ See:
 http://www.planetminecraft.com/mod/schematic2json-convertor/
 
 License:
-License is default, All Rights Reserved.
+License is default, All rights reserved.

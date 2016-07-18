@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+// ReSharper disable InconsistentNaming
 
 namespace Schematic2Json
 {
-    enum WoolColor : byte
+    public enum WoolColor : byte
     {
         white = 0,
         orange = 1,

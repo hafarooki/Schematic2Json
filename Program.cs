@@ -55,12 +55,22 @@ namespace Schematic2Json
                 };
                 foreach (WoolColor color in Enum.GetValues(typeof(WoolColor)))
                 {
-                    model.textures.Add(((byte) color).ToString(), "blocks/wool_colored_" + color);
+                    model.textures.Add(((byte)color).ToString(), "blocks/wool_colored_" + color);
+                    model.textures.Add((color + 16).ToString(), "blocks/hardened_stained_clay_" + color);
                 }
+                model.textures.Add(32.ToString(), "blocks/stone_slab_top");
+                model.textures.Add(33.ToString(), "blocks/sandstone_top");
+                model.textures.Add(34.ToString(), "blocks/cobblestone");
+                model.textures.Add(35.ToString(), "blocks/brick");
+                model.textures.Add(36.ToString(), "blocks/stonebrick");
+                model.textures.Add(37.ToString(), "blocks/nether_brick");
+                model.textures.Add(38.ToString(), "blocks/quartz_block_top");
 
                 var elements = new List<Model.Element>();
 
                 var random = new Random();
+
+                var usedTextures = new List<string>();
 
                 for (var x = 0; x < width; ++x)
                 {
@@ -76,14 +86,83 @@ namespace Schematic2Json
                             byte texture = 0;
 
                             if (block == 35 || block == 159) texture = data;
+                            if (block == 159) texture += 16;
+
+                            var slab = false;
+                            var top = false;
+
+                            if (block == 44)
+                            {
+                                slab = true;
+
+                                switch (data)
+                                {
+                                    case 8:
+                                        texture = 32;
+                                        top = true;
+                                        break;
+                                    case 0:
+                                        texture = 32;
+                                        break;
+                                    case 1:
+                                        texture = 33;
+                                        break;
+                                    case 9:
+                                        texture = 33;
+                                        top = true;
+                                        break;
+                                    case 3:
+                                        texture = 34;
+                                        break;
+                                    case 11:
+                                        texture = 34;
+                                        top = true;
+                                        break;
+                                    case 4:
+                                        texture = 35;
+                                        break;
+                                    case 12:
+                                        texture = 35;
+                                        top = true;
+                                        break;
+                                    case 5:
+                                        texture = 36;
+                                        break;
+                                    case 13:
+                                        texture = 36;
+                                        top = true;
+                                        break;
+                                    case 6:
+                                        texture = 37;
+                                        break;
+                                    case 14:
+                                        texture = 37;
+                                        top = true;
+                                        break;
+                                    case 7:
+                                        texture = 38;
+                                        break;
+                                    case 15:
+                                        texture = 38;
+                                        top = true;
+                                        break;
+                                    default:
+                                        texture = 32;
+                                        break;
+                                }
+                            }
+
+                            if (!usedTextures.Contains(texture.ToString()))
+                                usedTextures.Add(texture.ToString());
+
                             var rnd = (float) random.NextDouble()*16;
                             if (args.Contains("nonoise")) rnd = 0;
                             var face = new Model.Element.Face {texture = "#" + texture, uv = new[] {rnd, rnd, rnd, rnd}};
 
                             elements.Add(new Model.Element
                             {
-                                from = new float[] {x, y, z},
-                                to = new float[] {x + 1, y + 1, z + 1},
+                                from = new[] {x, y + (slab && top ? 0.5f : 0), z},
+                                to = new[] {x + 1, y + (slab && !top ? 0.5f : 1), z + 1},
                                 faces = new Dictionary<string, Model.Element.Face>
                                 {
                                     {"North", face},
@@ -98,6 +177,10 @@ namespace Schematic2Json
                     }
                 }
 
+                foreach (var key in model.textures.Keys.ToList())
+                {
+                    if (!usedTextures.Contains(key)) model.textures.Remove(key);
+                }
 
                 // Scale it to 32 due to MC maximum
                 if (!args.Contains("noscale"))
@@ -106,8 +189,6 @@ namespace Schematic2Json
                     var changedAmount = (max - 32.0f)/max;
                     if (changedAmount > 0)
                     {
-                        Console.WriteLine(max);
-                        Console.WriteLine(changedAmount);
                         Console.WriteLine("Scaling...");
                         foreach (var element in elements)
                         {
@@ -120,8 +201,6 @@ namespace Schematic2Json
                                 element.to[i] = Math.Max(element.to[i] - changedAmount*element.to[i], 0);
                             }
                         }
-                        Console.WriteLine(elements.Select(element => element.from.Max()).Concat(new float[] { 0 }).Max());
-                        Console.WriteLine(elements.Select(element => element.to.Max()).Concat(new float[] { 0 }).Max());
                     }
                 }
 

@@ -56,7 +56,7 @@ namespace Schematic2Json
                 foreach (WoolColor color in Enum.GetValues(typeof(WoolColor)))
                 {
                     model.textures.Add(((byte)color).ToString(), "blocks/wool_colored_" + color);
-                    model.textures.Add((color + 16).ToString(), "blocks/hardened_stained_clay_" + color);
+                    model.textures.Add((color + 16).ToString(), "blocks/hardened_clay_stained_" + color);
                 }
                 model.textures.Add(32.ToString(), "blocks/stone_slab_top");
                 model.textures.Add(33.ToString(), "blocks/sandstone_top");
